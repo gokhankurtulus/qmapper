@@ -1,0 +1,30 @@
+{
+  "name": "gokhankurtulus/qmapper",
+  "description": "A simple PHP ORM library.",
+  "keywords": [
+    "orm",
+    "data mapper"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Gökhan Kurtuluş",
+      "email": "gokhan@gokhankurtulus.com",
+      "homepage": "https://github.com/gokhankurtulus"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "QMapper\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^8.0 || ^8.1",
+    "gokhankurtulus/jsoncache": "^1.0",
+    "vlucas/phpdotenv": "^5.5",
+    "ext-pdo": "*"
+  },
+  "config": {
+    "preferred-install": "dist"
+  }
+}
