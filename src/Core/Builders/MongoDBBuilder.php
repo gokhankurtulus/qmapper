@@ -261,6 +261,7 @@ class MongoDBBuilder extends MongoDBConnection implements IBuilder
                 throw new DatabaseException(MapperStringTemplate::INVALID_ARGUMENTS->get());
             }
             @[$field, $direction] = $sortArgs;
+            if (empty($direction)) $direction = 'ASC';
             $sort[$field] = $direction === 'ASC' ? 1 : -1;
         }
 
