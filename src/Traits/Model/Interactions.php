@@ -24,19 +24,11 @@ trait Interactions
     protected static ?Collection $collection = null;
     protected static mixed $builderStatement = null;
 
-    protected static array $instances = [];
-
     /**
      * @return static|null
      */
     final public static function getInstance(): ?static
     {
-        // TODO Singleton pattern may occur problems
-//        $cls = static::class;
-//        if (!isset(static::$instances[$cls])) {
-//            static::$instances[$cls] = new static();
-//        }
-//        return static::$instances[$cls];
         $instance = new static();
         $instance->resolveFields();
         $instance->separateFieldFlags();
