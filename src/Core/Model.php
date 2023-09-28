@@ -44,15 +44,12 @@ abstract class Model extends Builder implements Arrayable, Jsonable
     /**
      * Returns true if instance has different values from given fields
      * @param array $fields
-     * @return bool
+     * @param bool $returnDiff
+     * @return array|bool
      */
-    public function hasDiff(array $fields): bool
+    public function hasDiff(array $fields, bool $returnDiff = false): array|bool
     {
-        try {
-            return (new Validator(static::getInstance(), $fields))->hasDiff();
-        } catch (\Exception $exception) {
-            return false;
-        }
+        return (new Validator($this, $fields))->hasDiff($returnDiff);
     }
 
     /**

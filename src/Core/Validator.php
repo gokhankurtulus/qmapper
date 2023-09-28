@@ -27,16 +27,34 @@ class Validator
 
 
     /**
-     * @return bool
+     * @param bool $returnDiff
+     * @return array|bool
      */
-    public function hasDiff(): bool
+    public function hasDiff(bool $returnDiff = false): array|bool
     {
-        if (!$this->getModel()?->getProperties())
-            return true;
-        foreach ($this->getFields() as $field => $value) {
-            if (!array_key_exists($field, $this->getModel()?->getProperties()) || $this->getModel()?->getField($field)?->getValue() != $value)
+        $diff = [];
+        // If there is no property we don't need to check by key name.
+        if (!$this->getModel()?->getProperties()) {
+            if (!$returnDiff)
                 return true;
+            return array_keys($this->getFields());
         }
+
+        foreach ($this->getFields() as $field => $value) {
+            $isPropertyExist = array_key_exists($field, $this->getModel()?->getProperties());
+            $isFieldValueMatches = $this->getModel()?->getField($field)?->getValue() === $value;
+            if (!$isPropertyExist || !$isFieldValueMatches) {
+                if (!$returnDiff) {
+                    return true;
+                }
+                if (!in_array($field, $diff)) {
+                    $diff[] = $field;
+                }
+            }
+        }
+        if ($returnDiff && !empty($diff))
+            return $diff;
+
         return false;
     }
 
