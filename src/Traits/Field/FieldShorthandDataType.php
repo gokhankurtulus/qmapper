@@ -7,16 +7,34 @@
 
 namespace QMapper\Traits\Field;
 
+use QMapper\Enums\DatabaseDriver;
 use QMapper\Enums\DataType;
 
 trait FieldShorthandDataType
 {
-    public function index(?string $name = null): static
+    public function index(string $name, ?DatabaseDriver $driver): static
     {
-        $this->id($name)
-            ->increament()
+        if ($driver === DatabaseDriver::MongoDB) {
+            $this->objectId($name);
+        } else {
+            $this->id($name)
+                ->increament()
+                ->primary()
+                ->unique()
+                ->identifier();
+        }
+        return $this;
+    }
+
+    private function objectId(string $name): static
+    {
+        $this->name($name)
+            ->type(DataType::OBJECTID)
+            ->length([24])
             ->primary()
-            ->identifier();
+            ->unique()
+            ->identifier()
+            ->searchable();
         return $this;
     }
 

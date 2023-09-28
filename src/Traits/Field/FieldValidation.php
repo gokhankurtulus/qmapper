@@ -25,7 +25,9 @@ trait FieldValidation
         if (!$this->isNullable() && strlen(preg_replace('/\s+/', '', $value)) === 0)
             throw new AttributeException(MapperStringTemplate::FIELD_CANT_BE_NULL->get($this->getName()));
         if (!is_null($value)) {
-            if ($this->getType() === DataType::TINYINT ||
+            if ($this->getType() === DataType::OBJECTID)
+                $this->validateObjectId($value, $minVal, $maxVal);
+            elseif ($this->getType() === DataType::TINYINT ||
                 $this->getType() === DataType::SMALLINT ||
                 $this->getType() === DataType::MEDIUMINT ||
                 $this->getType() === DataType::INT ||
@@ -65,6 +67,24 @@ trait FieldValidation
     }
 
     /**
+     * @param mixed $value
+     * @param float|int|string $minVal
+     * @param float|int|string $maxVal
+     * @return bool
+     * @throws AttributeException
+     */
+    public function validateObjectId(mixed $value, float|int|string $minVal, float|int|string $maxVal): bool
+    {
+        if (!is_string($value) || !ctype_xdigit($value))
+            throw new AttributeException(MapperStringTemplate::FIELD_MUST_BE_TYPE->get($this->getName(), $this->getType()->name));
+        if (strlen($value) < $minVal)
+            throw new AttributeException(MapperStringTemplate::FIELD_MIN_VALUE_CAN_BE->get($this->getName(), $minVal));
+        if (strlen($value) > $maxVal)
+            throw new AttributeException(MapperStringTemplate::FIELD_MAX_VALUE_CAN_BE->get($this->getName(), $maxVal));
+        return true;
+    }
+
+    /**
      * @param $value
      * @param $minVal
      * @param $maxVal
@@ -73,7 +93,7 @@ trait FieldValidation
      */
     public function validateNumber($value, $minVal, $maxVal): bool
     {
-        if (!is_numeric($value) && !ctype_xdigit($value))
+        if (!is_numeric($value))
             throw new AttributeException(MapperStringTemplate::FIELD_MUST_BE_TYPE->get($this->getName(), $this->getType()->name));
         if ($value < $minVal)
             throw new AttributeException(MapperStringTemplate::FIELD_MIN_VALUE_CAN_BE->get($this->getName(), $minVal));

@@ -7,6 +7,7 @@
 namespace QMapper\Enums;
 enum DataType
 {
+    case OBJECTID;
     case TINYINT;
     case SMALLINT;
     case MEDIUMINT;
@@ -47,6 +48,7 @@ enum DataType
     public function min(): int|float|string
     {
         return match ($this) {
+            self::OBJECTID => 24,
             self::TINYINT => -128,
             self::SMALLINT => -32768,
             self::MEDIUMINT => -8388608,
@@ -83,6 +85,7 @@ enum DataType
     public function max(): int|float|string
     {
         return match ($this) {
+            self::OBJECTID => 24,
             self::TINYINT => 127,
             self::SMALLINT => 32767,
             self::MEDIUMINT => 8388607,
