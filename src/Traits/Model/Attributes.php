@@ -7,7 +7,7 @@
 
 namespace QMapper\Traits\Model;
 
-use QMapper\Field;
+use QMapper\Core\Field;
 
 trait Attributes
 {

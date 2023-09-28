@@ -7,52 +7,88 @@
 
 namespace QMapper\Core;
 
-use JsonSerializable;
+use QMapper\Exceptions\ModelException;
 use QMapper\Interfaces\Arrayable;
 use QMapper\Interfaces\Jsonable;
-use QMapper\Exceptions\ModelException;
-use QMapper\Traits\Attributes;
-use QMapper\Traits\Interactions;
+use QMapper\Traits\Model\Attributes;
+use QMapper\Traits\Model\Interactions;
 
-abstract class Model extends Builder implements Arrayable, Jsonable, JsonSerializable
+abstract class Model extends Builder implements Arrayable, Jsonable
 {
-    use Attributes, Interactions;
+    use Attributes;
+    use Interactions;
 
     /**
-     * Convert the model instance to an array.
-     *
+     * @return Field[]
+     */
+    abstract protected static function schema(): array;
+
+    /**
+     * @param array $fields
+     * @return bool
+     */
+    public function validate(array $fields): bool
+    {
+        try {
+            return (new Validator(static::getInstance(), $fields))->validate();
+        } catch (\Exception $exception) {
+            return false;
+        }
+    }
+
+    /**
+     * Returns true if instance has different values from given fields
+     * @param array $fields
+     * @return bool
+     */
+    public function hasDiff(array $fields): bool
+    {
+        try {
+            return (new Validator(static::getInstance(), $fields))->hasDiff();
+        } catch (\Exception $exception) {
+            return false;
+        }
+    }
+
+    /**
+     * Returns true if instance has index value
+     * @return bool
+     */
+    public function hasIndex(): bool
+    {
+        return (bool)$this->getProperty(static::getIndexKey());
+    }
+
+    /**
+     * Returns true if instance has properties
+     * @return bool
+     */
+    public function isEmpty(): bool
+    {
+        return empty($this->getProperties());
+    }
+
+    /**
+     * Remove hidden fields from properties
      * @return array
      */
     public function toArray(): array
     {
-        return [];
+        return array_diff_key($this->getProperties(), array_flip($this->getHiddens()));
     }
 
     /**
-     * Convert the model instance to JSON.
-     *
      * @param int $options
      * @return string
      * @throws ModelException
      */
-    public function toJson(int $options = 0): string
+    public function toJson(int $options = JSON_FORCE_OBJECT): string
     {
-        $json = json_encode($this->jsonSerialize(), $options);
+        $json = json_encode($this->toArray(), $options);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new ModelException(sprintf("Error encoding model %s to JSON: %s", basename($this::class), json_last_error_msg()));
         }
-
         return $json;
-    }
-
-    /**
-     * Convert the object into something JSON serializable.
-     *
-     * @return mixed
-     */
-    public function jsonSerialize(): mixed
-    {
-        return $this->toArray();
     }
 }
