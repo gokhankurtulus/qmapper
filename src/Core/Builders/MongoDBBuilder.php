@@ -217,6 +217,9 @@ class MongoDBBuilder extends MongoDBConnection implements IBuilder
                 throw new DatabaseException(MapperStringTemplate::INVALID_ARGUMENTS->get());
             }
             [$field, $operator, $value] = $condition;
+
+            $value = is_numeric($value) ? floatval($value) : $value;
+
             $expression = [$field => [$this->getCompareOperator($operator) => $value]];
             $expressions[] = $expression;
         }
