@@ -86,40 +86,26 @@ trait Attributes
             $this->setFields(static::schema());
             /** If fields an indexed array convert to an associative array. */
             $this->setFields(array_combine(
+            /** Get keys of fields*/
                 array_map(fn($field) => $field->getName(), $this->getFields()),
+                /** Use values of fields*/
                 $this->getFields()
             ));
         }
     }
 
-    private function createProperties()
-    {
-        if (empty($this->getProperties())) {
-            foreach ($this->getFields() as $field) {
-                $this->setProperty($field->getName(), $field->getValue());
-            }
-        }
-    }
     /**
-     * Assigns properties from given array or object.
-     * @param array|object $entityValues
+     * Sets field's values to null.
      * @return void
      */
-    public function assignProperties(array|object $entityValues = []): void
+    private function resetFieldValues(): void
     {
-        foreach ($entityValues as $entityKey => $entityValue) {
-            if ($this->isFieldExist($entityKey)) {
-                $this->setFieldValue($entityKey, $entityValue);
-                $this->setProperty($entityKey, $entityValue);
-                if ($entityKey === static::getIndexKey())
-                    static::setIndexValue($entityValue);
-            }
-        }
+        array_map(fn($field) => $field->value(null), $this->getFields());
     }
 
     /**
      * Returns fields.
-     * @return array
+     * @return Field[] array
      */
     public function getFields(): array
     {
@@ -146,7 +132,7 @@ trait Attributes
     }
 
     /**
-     * Returns field if exist, otherwise returns null.
+     * Returns field if exists, otherwise returns null.
      * @param string $key
      * @return Field|null
      */
@@ -164,6 +150,45 @@ trait Attributes
     private function setFieldValue(string $key, mixed $value): void
     {
         $this->getField($key)?->value($value);
+    }
+
+    /**
+     * Create properties from fields array.
+     * @return void
+     */
+    private function createProperties(): void
+    {
+        if (empty($this->getProperties())) {
+            foreach ($this->getFields() as $field) {
+                $this->setProperty($field->getName(), $field->getValue());
+            }
+        }
+    }
+
+    /**
+     * Sets properties values to null.
+     * @return void
+     */
+    private function resetPropertyValues(): void
+    {
+        array_map(fn($propertyKey) => $this->setProperty($propertyKey, null), array_keys($this->getProperties()));
+    }
+
+    /**
+     * Assigns properties and field value from given array or object.
+     * @param array|object $entityValues
+     * @return void
+     */
+    public function assignProperties(array|object $entityValues = []): void
+    {
+        foreach ($entityValues as $entityKey => $entityValue) {
+            if ($this->isFieldExist($entityKey)) {
+                $this->setFieldValue($entityKey, $entityValue);
+                $this->setProperty($entityKey, $entityValue);
+                if ($entityKey === static::getIndexKey())
+                    static::setIndexValue($entityValue);
+            }
+        }
     }
 
     /**
@@ -186,16 +211,6 @@ trait Attributes
     }
 
     /**
-     * Returns true if property exist, otherwise returns false.
-     * @param string $key
-     * @return bool
-     */
-    public function isPropertyExist(string $key): bool
-    {
-        return array_key_exists($key, $this->getProperties());
-    }
-
-    /**
      * Returns property value.
      * @param string $key
      * @return mixed
@@ -214,6 +229,16 @@ trait Attributes
     public function setProperty(string $key, mixed $value): void
     {
         $this->properties[$key] = $value;
+    }
+
+    /**
+     * Returns true if property exist, otherwise returns false.
+     * @param string $key
+     * @return bool
+     */
+    public function isPropertyExist(string $key): bool
+    {
+        return array_key_exists($key, $this->getProperties());
     }
 
     /**
@@ -248,6 +273,14 @@ trait Attributes
     }
 
     /**
+     * @param array $propertyFlags
+     */
+    private function setFieldFlags(array $propertyFlags): void
+    {
+        static::$fieldFlags[static::class] = $propertyFlags;
+    }
+
+    /**
      * @param string $key
      * @param string $flag
      * @return void
@@ -255,14 +288,6 @@ trait Attributes
     private function addFieldFlag(string $key, string $flag): void
     {
         static::$fieldFlags[static::class][$key][] = $flag;
-    }
-
-    /**
-     * @param array $propertyFlags
-     */
-    private function setFieldFlags(array $propertyFlags): void
-    {
-        static::$fieldFlags[static::class] = $propertyFlags;
     }
 
     /**
