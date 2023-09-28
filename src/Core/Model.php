@@ -7,6 +7,7 @@
 
 namespace QMapper\Core;
 
+use QMapper\Exceptions\AttributeException;
 use QMapper\Exceptions\ModelException;
 use QMapper\Interfaces\Arrayable;
 use QMapper\Interfaces\Jsonable;
@@ -25,13 +26,17 @@ abstract class Model extends Builder implements Arrayable, Jsonable
 
     /**
      * @param array $fields
+     * @param bool $raiseError
      * @return bool
+     * @throws AttributeException
      */
-    public function validate(array $fields): bool
+    public function validate(array $fields, bool $raiseError = false): bool
     {
         try {
-            return (new Validator(static::getInstance(), $fields))->validate();
+            return (new Validator($this, $fields))->validate();
         } catch (\Exception $exception) {
+            if ($raiseError)
+                throw $exception;
             return false;
         }
     }

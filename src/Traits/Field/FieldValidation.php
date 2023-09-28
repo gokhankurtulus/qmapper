@@ -24,7 +24,7 @@ trait FieldValidation
         $maxVal = $this->getMax() ?? $this->getType()->max();
         if (!$this->isNullable() && strlen(preg_replace('/\s+/', '', $value)) === 0)
             throw new AttributeException(MapperStringTemplate::FIELD_CANT_BE_NULL->get($this->getName()));
-        if ($value) {
+        if (!is_null($value)) {
             if ($this->getType() === DataType::TINYINT ||
                 $this->getType() === DataType::SMALLINT ||
                 $this->getType() === DataType::MEDIUMINT ||
