@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Gökhan Kurtuluş @gokhankurtulus
- *  Date: 9.06.2023 Time: 06:38
+ * Date: 24.09.2023 Time: 04:34
  */
 
 
@@ -11,15 +11,15 @@ use QMapper\Enums\MapperStringTemplate;
 use QMapper\Exceptions\DatabaseException;
 use QMapper\Interfaces\IBuilder;
 
-class MySQLBuilder extends PDOBuilder implements IBuilder
+class PostgreSQLBuilder extends PDOBuilder implements IBuilder
 {
     /**
      * @throws DatabaseException
      */
     public function initialize(): void
     {
-        if (!extension_loaded('pdo_mysql')) throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('pdo_mysql'));
-        $this->setPDO($this->createPDO($_ENV['MYSQL_DSN'], $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD']));
+        if (!extension_loaded('pdo_pgsql')) throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('pdo_pgsql'));
+        $this->setPDO($this->createPDO($_ENV['PGSQL_DSN'], $_ENV['PGSQL_USER'], $_ENV['PGSQL_PASSWORD']));
         $this->getPDO()?->exec("SET NAMES UTF8");
     }
 }
