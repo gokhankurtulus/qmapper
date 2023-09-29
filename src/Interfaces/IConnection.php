@@ -8,7 +8,9 @@
 namespace QMapper\Interfaces;
 
 
-interface DBMSInterface
+interface IConnection
 {
-    public function __construct();
+    public function initialize(): void;
+
+    public function terminate(): void;
 }

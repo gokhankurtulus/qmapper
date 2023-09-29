@@ -7,55 +7,58 @@
 
 namespace QMapper\Core;
 
-use QMapper\Enums\DataDriver;
+use QMapper\Enums\DatabaseDriver;
 use QMapper\Exceptions\BuilderException;
-use QMapper\Interfaces\BuilderInterface;
+use QMapper\Interfaces\IBuilder;
 
-class Builder
+abstract class Builder
 {
-    private static ?DataDriver $dataDriver;
-    private static ?BuilderInterface $DBMSBuilder;
+    protected static ?DatabaseDriver $driver = null;
+    protected static array|null $builders = null;
 
     /**
      * @throws BuilderException
      */
     public function __construct()
     {
-        static::setDataDriver(DataDriver::tryFromNotNull($_ENV['DB_DRIVER']));
-        static::setDBMSBuilder(self::getDataDriver()?->getDriverBuilder());
-        if (!static::getDBMSBuilder())
-            throw new BuilderException('Builder is not set correctly.');
+        if (!static::getBuilder()) {
+            if (is_null(static::getDriver()))
+                static::setDriver(DatabaseDriver::tryFrom($_ENV['DB_DEFAULT_DRIVER']));
+            static::setBuilder(static::getDriver()?->getDriverBuilder());
+            if (!static::getBuilder())
+                throw new BuilderException('Builder is not set correctly.');
+        }
     }
 
     /**
-     * @return DataDriver|null
+     * @return DatabaseDriver|null
      */
-    public static function getDataDriver(): ?DataDriver
+    final public static function getDriver(): ?DatabaseDriver
     {
-        return static::$dataDriver;
+        return static::$driver;
     }
 
     /**
-     * @param DataDriver|null $dataDriver
+     * @param DatabaseDriver|null $driver
      */
-    public static function setDataDriver(?DataDriver $dataDriver): void
+    final protected static function setDriver(?DatabaseDriver $driver): void
     {
-        static::$dataDriver = $dataDriver;
+        static::$driver = $driver;
     }
 
     /**
-     * @return BuilderInterface|null
+     * @return IBuilder|null
      */
-    public static function getDBMSBuilder(): ?BuilderInterface
+    final protected static function getBuilder(): ?IBuilder
     {
-        return static::$DBMSBuilder;
+        return static::$builders[static::class] ?? null;
     }
 
     /**
-     * @param BuilderInterface|null $DBMSBuilder
+     * @param IBuilder|null $builder
      */
-    public static function setDBMSBuilder(?BuilderInterface $DBMSBuilder): void
+    final protected static function setBuilder(?IBuilder $builder): void
     {
-        static::$DBMSBuilder = $DBMSBuilder;
+        static::$builders[static::class] = $builder;
     }
 }

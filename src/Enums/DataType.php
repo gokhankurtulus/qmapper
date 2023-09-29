@@ -5,42 +5,50 @@
  */
 
 namespace QMapper\Enums;
-enum DataType: string
+enum DataType
 {
-    case TINYINT = 'TINYINT';
-    case SMALLINT = 'SMALLINT';
-    case MEDIUMINT = 'MEDIUMINT';
-    case INT = 'INT';
-    case BIGINT = 'BIGINT';
+    case OBJECTID;
+    case TINYINT;
+    case SMALLINT;
+    case MEDIUMINT;
+    case INT;
+    case BIGINT;
 
-    case DECIMAL = 'DECIMAL';
-    case FLOAT = 'FLOAT';
-    case DOUBLE = 'DOUBLE';
+    case DECIMAL;
+    case FLOAT;
+    case DOUBLE;
 
-    case BOOLEAN = 'BOOLEAN';
+    case BOOLEAN;
 
-    case CHAR = 'CHAR';
-    case VARCHAR = 'VARCHAR';
-    case TINYTEXT = 'TINYTEXT';
-    case TEXT = 'TEXT';
-    case MEDIUMTEXT = 'MEDIUMTEXT';
-    case LONGTEXT = 'LONGTEXT';
+    case CHAR;
+    case VARCHAR;
+    case TINYTEXT;
+    case TEXT;
+    case MEDIUMTEXT;
+    case LONGTEXT;
 
-    case ENUM = 'ENUM';
+    case ENUM;
 
-    case DATE = 'DATE';
-    case DATETIME = 'DATETIME';
-    case TIMESTAMP = 'TIMESTAMP';
-    case TIME = 'TIME';
-    case YEAR = 'YEAR';
+    case DATE;
+    case DATETIME;
+    case TIMESTAMP;
+    case TIME;
+    case YEAR;
+
+    case UUID;
+    case EMAIL;
+    case IP;
+    case IPV4;
+    case IPV6;
 
     /**
      * Returns min lenght of selected data type
-     * @return int|float|string|null
+     * @return int|float|string
      */
-    public function min(): int|float|string|null
+    public function min(): int|float|string
     {
         return match ($this) {
+            self::OBJECTID => 24,
             self::TINYINT => -128,
             self::SMALLINT => -32768,
             self::MEDIUMINT => -8388608,
@@ -59,19 +67,25 @@ enum DataType: string
             self::ENUM => 0,
             self::DATE => '1000-01-01',
             self::DATETIME => '1000-01-01 00:00:00',
-            self::TIMESTAMP => '1970-01-01 00:00:01',
+            self::TIMESTAMP => '1970-01-01 00:00:00',
             self::TIME => '-838:59:59',
             self::YEAR => 1901,
+            self::UUID => 0,
+            self::EMAIL => 0,
+            self::IP => 0,
+            self::IPV4 => 0,
+            self::IPV6 => 0,
         };
     }
 
     /**
      * Returns max lenght of selected data type
-     * @return int|float|string|null
+     * @return int|float|string
      */
-    public function max(): int|float|string|null
+    public function max(): int|float|string
     {
         return match ($this) {
+            self::OBJECTID => 24,
             self::TINYINT => 127,
             self::SMALLINT => 32767,
             self::MEDIUMINT => 8388607,
@@ -90,9 +104,14 @@ enum DataType: string
             self::ENUM => 65535,
             self::DATE => '9999-12-31',
             self::DATETIME => '9999-12-31 23:59:59',
-            self::TIMESTAMP => '2038-01-19 03:14:07',
+            self::TIMESTAMP => '2037-01-01 00:00:00',
             self::TIME => '838:59:59',
-            self::YEAR => 9999,
+            self::YEAR => 2155,
+            self::UUID => 36,
+            self::EMAIL => 320,
+            self::IP => 45,
+            self::IPV4 => 15,
+            self::IPV6 => 45,
         };
     }
 }

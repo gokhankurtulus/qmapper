@@ -1,6 +1,7 @@
 {
   "name": "gokhankurtulus/qmapper",
   "description": "A simple PHP ORM library.",
+  "type": "library",
   "keywords": [
     "orm",
     "data mapper"
@@ -20,9 +21,12 @@
   },
   "require": {
     "php": "^8.0 || ^8.1",
-    "gokhankurtulus/jsoncache": "^1.0",
-    "vlucas/phpdotenv": "^5.5",
-    "ext-pdo": "*"
+    "gokhankurtulus/dotenv": "^1.0.0",
+    "gokhankurtulus/jsoncache": "^1.0.1",
+    "mongodb/mongodb": "^1.15",
+    "ext-pdo": "*",
+    "ext-mongodb": "*",
+    "ext-ctype": "*"
   },
   "config": {
     "preferred-install": "dist"
