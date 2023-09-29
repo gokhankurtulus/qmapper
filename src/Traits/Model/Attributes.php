@@ -70,6 +70,7 @@ trait Attributes
     }
 
     /**
+     * Check for $table and $indexKey are specified.
      * @return bool
      */
     public function checkNecessaryModelProperties(): bool
@@ -123,16 +124,6 @@ trait Attributes
     }
 
     /**
-     * Returns true if field exist, otherwise returns false.
-     * @param string $key
-     * @return bool
-     */
-    public function isFieldExist(string $key): bool
-    {
-        return array_key_exists($key, $this->getFields());
-    }
-
-    /**
      * Returns field if exists, otherwise returns null.
      * @param string $key
      * @return Field|null
@@ -140,6 +131,16 @@ trait Attributes
     public function getField(string $key): ?Field
     {
         return $this->isFieldExist($key) ? $this->getFields()[$key] : null;
+    }
+
+    /**
+     * Returns true if field exist, otherwise returns false.
+     * @param string $key
+     * @return bool
+     */
+    public function isFieldExist(string $key): bool
+    {
+        return array_key_exists($key, $this->getFields());
     }
 
     /**
@@ -243,7 +244,7 @@ trait Attributes
     }
 
     /**
-     * Change properties to allow tree view from fields related with models and can be reachable in properties.
+     * Change properties to allow tree view from fields related model and can be reachable in properties.
      * @param bool $hideHiddenFields If true sets property value as array from related model, but object can't be reachable.
      * @return $this
      */
@@ -302,6 +303,7 @@ trait Attributes
     }
 
     /**
+     * Returns all flags as array.
      * @return array
      */
     public function getFieldFlags(): array
@@ -310,6 +312,7 @@ trait Attributes
     }
 
     /**
+     * Set all flags.
      * @param array $propertyFlags
      */
     private function setFieldFlags(array $propertyFlags): void
@@ -318,16 +321,18 @@ trait Attributes
     }
 
     /**
-     * @param string $key
+     * Add new key to a flag.
      * @param string $flag
+     * @param string $key
      * @return void
      */
-    private function addFieldFlag(string $key, string $flag): void
+    private function addFieldFlag(string $flag, string $key): void
     {
-        static::$fieldFlags[static::class][$key][] = $flag;
+        static::$fieldFlags[static::class][$flag][] = $key;
     }
 
     /**
+     * Remove all flags.
      * @return void
      */
     private function deleteFieldFlags(): void

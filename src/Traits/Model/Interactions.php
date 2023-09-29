@@ -174,12 +174,19 @@ trait Interactions
         return hash('sha256', $query . print_r($bindings, true));
     }
 
-    public static function getOrder(): array
+    /**
+     * @return array
+     */
+    final protected static function getOrder(): array
     {
         return static::$order;
     }
 
-    public static function setOrder(array $order): void
+    /**
+     * @param array $order
+     * @return void
+     */
+    final protected static function setOrder(array $order): void
     {
         static::$order = $order;
     }
