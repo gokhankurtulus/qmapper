@@ -11,7 +11,7 @@ use QMapper\Enums\DatabaseDriver;
 use QMapper\Exceptions\BuilderException;
 use QMapper\Interfaces\IBuilder;
 
-class Builder
+abstract class Builder
 {
     protected static ?DatabaseDriver $driver = null;
     protected static array|null $builders = null;
