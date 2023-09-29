@@ -8,6 +8,7 @@
 namespace QMapper\Traits\Model;
 
 use QMapper\Core\Field;
+use QMapper\Core\Model;
 
 trait Attributes
 {
@@ -242,7 +243,41 @@ trait Attributes
     }
 
     /**
-     * Separates field flags (uniques, uuids, requireds, nullables, hiddens, searchables).
+     * Change properties to allow tree view from fields related with models and can be reachable in properties.
+     * @param bool $hideHiddenFields If true sets property value as array from related model, but object can't be reachable.
+     * @return $this
+     */
+    public function tree(bool $hideHiddenFields = false): static
+    {
+        $relations = $this->getRelations();
+        /** If there is no relation return $this.*/
+        if (!$relations)
+            return $this;
+        foreach ($relations as $relation) {
+            $fieldHasRelation = $this->getField($relation);
+            /** If marked as related but field doesn't exist continue to next relation. */
+            if (!$fieldHasRelation)
+                continue;
+            /** Get model and column key from related array.*/
+            [$model, $key] = $fieldHasRelation->getRelated();
+            if (class_exists($model) && is_string($key)) {
+                /** Find relatedModel with column key and value from field which has relation.*/
+                /** @var Model $relatedModel */
+                $relatedModel = $model::find($key, $fieldHasRelation->getValue());
+                /** Set relation property value to relatedModel if model is not empty.*/
+                if (!$relatedModel->isEmpty()) {
+                    if ($hideHiddenFields)
+                        $this->setProperty($relation, $relatedModel->toArray());
+                    else
+                        $this->setProperty($relation, $relatedModel);
+                }
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Separates field flags (uniques, uuids, requireds, nullables, hiddens, searchables, relations).
      * @return void
      */
     private function separateFieldFlags(): void
@@ -261,6 +296,8 @@ trait Attributes
                 $this->addFieldFlag('searchables', $field->getName());
             if ($field->isUuid())
                 $this->addFieldFlag('uuids', $field->getName());
+            if ($field->hasRelation())
+                $this->addFieldFlag('relations', $field->getName());
         }
     }
 
@@ -350,5 +387,14 @@ trait Attributes
     public function getUuids(): array
     {
         return $this->getFieldFlags()['uuids'] ?? [];
+    }
+
+    /**
+     * Returns relation fields.
+     * @return array
+     */
+    public function getRelations(): array
+    {
+        return $this->getFieldFlags()['relations'] ?? [];
     }
 }

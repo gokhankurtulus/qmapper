@@ -7,6 +7,8 @@
 
 namespace QMapper\Traits\Field;
 
+use QMapper\Core\Model;
+
 trait FieldTableHelper
 {
     private bool $store = true;
@@ -25,6 +27,8 @@ trait FieldTableHelper
     private ?string $comment = null;
     private ?string $regex = null;
     private ?string $match = null;
+
+    private ?array $related = [];
 
     /**
      * Get the field is storable.
@@ -308,5 +312,35 @@ trait FieldTableHelper
     {
         $this->match = $match;
         return $this;
+    }
+
+    /**
+     * Get the field's relation data.
+     * @return array|null
+     */
+    public function getRelated(): ?array
+    {
+        return $this->related;
+    }
+
+    /**
+     * Set field's relation data.
+     * @param string $model
+     * @param string $key
+     * @return $this
+     */
+    public function related(string $model, string $key): static
+    {
+        $this->related = [$model, $key];
+        return $this;
+    }
+
+    /**
+     * Get the field has relation.
+     * @return bool
+     */
+    public function hasRelation(): bool
+    {
+        return !empty($this->related);
     }
 }
