@@ -14,7 +14,7 @@ use QMapper\Interfaces\Jsonable;
 use QMapper\Traits\Model\Attributes;
 use QMapper\Traits\Model\Interactions;
 
-abstract class Model extends Builder implements Arrayable, Jsonable
+abstract class Model extends BuilderAgent implements Arrayable, Jsonable
 {
     use Attributes;
     use Interactions;

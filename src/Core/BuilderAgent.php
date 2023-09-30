@@ -8,26 +8,27 @@
 namespace QMapper\Core;
 
 use QMapper\Enums\DatabaseDriver;
-use QMapper\Exceptions\BuilderException;
 use QMapper\Interfaces\IBuilder;
 
-abstract class Builder
+abstract class BuilderAgent
 {
+    /**
+     * @var DatabaseDriver|null
+     */
     protected static ?DatabaseDriver $driver = null;
+    /**
+     * @var IBuilder[]|null
+     */
     protected static array|null $builders = null;
 
     /**
-     * @throws BuilderException
+     * Configure the builder.
      */
-    public function __construct()
+    final protected static function configure(): void
     {
-        if (!static::getBuilder()) {
-            if (is_null(static::getDriver()))
-                static::setDriver(DatabaseDriver::tryFrom($_ENV['DB_DEFAULT_DRIVER']));
-            static::setBuilder(static::getDriver()?->getDriverBuilder());
-            if (!static::getBuilder())
-                throw new BuilderException('Builder is not set correctly.');
-        }
+        if (is_null(static::getDriver()))
+            static::setDriver(DatabaseDriver::tryFrom($_ENV['DB_DEFAULT_DRIVER']));
+        static::setBuilder(static::getDriver()?->getDriverBuilder());
     }
 
     /**

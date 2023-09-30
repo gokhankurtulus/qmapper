@@ -22,29 +22,20 @@ abstract class MongoDBConnection implements IConnection
     protected ?Database $database = null;
     protected ?Collection $collection = null;
 
+    abstract public function initialize(): void;
+
     /**
      * @throws DatabaseException
      */
     public function __construct()
     {
-        try {
-            if (!extension_loaded('mongodb')) throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('mongodb'));
-            $this->initialize();
-        } catch (\Exception|\Throwable $exception) {
-            throw new DatabaseException($exception->getMessage());
-        }
+        if (!extension_loaded('mongodb'))
+            throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('mongodb'));
     }
 
     public function __destruct()
     {
         $this->terminate();
-    }
-
-    public function initialize(): void
-    {
-        $this->setManager(new Manager($_ENV['MONGODB_DSN']));
-        $this->setClient(new Client($_ENV['MONGODB_DSN']));
-        $this->setDatabase($this->getClient()?->selectDatabase($_ENV['MONGODB_DATABASE']));
     }
 
     public function terminate(): void

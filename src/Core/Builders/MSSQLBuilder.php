@@ -18,9 +18,12 @@ class MSSQLBuilder extends PDOBuilder implements IBuilder
      */
     public function initialize(): void
     {
-        if (!extension_loaded('pdo_sqlsrv')) throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('pdo_sqlsrv'));
-        $this->setPDO($this->createPDO($_ENV['MSSQL_DSN'], $_ENV['MSSQL_USER'], $_ENV['MSSQL_PASSWORD']));
-        $this->getPDO()?->setAttribute(\PDO::SQLSRV_ATTR_ENCODING, \PDO::SQLSRV_ENCODING_UTF8);
+        if (!$this->getPDO()) {
+            if (!extension_loaded('pdo_sqlsrv'))
+                throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('pdo_sqlsrv'));
+            $this->setPDO($this->createPDO($_ENV['MSSQL_DSN'], $_ENV['MSSQL_USER'], $_ENV['MSSQL_PASSWORD']));
+            $this->getPDO()?->setAttribute(\PDO::SQLSRV_ATTR_ENCODING, \PDO::SQLSRV_ENCODING_UTF8);
+        }
     }
 
     /**

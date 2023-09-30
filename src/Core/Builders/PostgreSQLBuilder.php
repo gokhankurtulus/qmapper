@@ -18,8 +18,11 @@ class PostgreSQLBuilder extends PDOBuilder implements IBuilder
      */
     public function initialize(): void
     {
-        if (!extension_loaded('pdo_pgsql')) throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('pdo_pgsql'));
-        $this->setPDO($this->createPDO($_ENV['PGSQL_DSN'], $_ENV['PGSQL_USER'], $_ENV['PGSQL_PASSWORD']));
-        $this->getPDO()?->exec("SET NAMES UTF8");
+        if (!$this->getPDO()) {
+            if (!extension_loaded('pdo_pgsql'))
+                throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('pdo_pgsql'));
+            $this->setPDO($this->createPDO($_ENV['PGSQL_DSN'], $_ENV['PGSQL_USER'], $_ENV['PGSQL_PASSWORD']));
+            $this->getPDO()?->exec("SET NAMES UTF8");
+        }
     }
 }

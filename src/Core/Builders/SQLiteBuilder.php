@@ -18,8 +18,11 @@ class SQLiteBuilder extends PDOBuilder implements IBuilder
      */
     public function initialize(): void
     {
-        if (!extension_loaded('pdo_sqlite')) throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('pdo_sqlite'));
-        $this->setPDO($this->createPDO($_ENV['SQLITE_DSN']));
-        $this->getPDO()?->exec("PRAGMA encoding = 'UTF-8'");
+        if (!$this->getPDO()) {
+            if (!extension_loaded('pdo_sqlite'))
+                throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('pdo_sqlite'));
+            $this->setPDO($this->createPDO($_ENV['SQLITE_DSN']));
+            $this->getPDO()?->exec("PRAGMA encoding = 'UTF-8'");
+        }
     }
 }

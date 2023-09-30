@@ -30,6 +30,8 @@ trait Interactions
     final public static function getInstance(): ?static
     {
         $instance = new static();
+        if (!$instance::getBuilder())
+            $instance::configure();
         $instance->resolveFields();
         $instance->separateFieldFlags();
         $instance->createProperties();

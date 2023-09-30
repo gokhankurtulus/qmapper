@@ -18,8 +18,11 @@ class MySQLBuilder extends PDOBuilder implements IBuilder
      */
     public function initialize(): void
     {
-        if (!extension_loaded('pdo_mysql')) throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('pdo_mysql'));
-        $this->setPDO($this->createPDO($_ENV['MYSQL_DSN'], $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD']));
-        $this->getPDO()?->exec("SET NAMES UTF8");
+        if (!$this->getPDO()) {
+            if (!extension_loaded('pdo_mysql'))
+                throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('pdo_mysql'));
+            $this->setPDO($this->createPDO($_ENV['MYSQL_DSN'], $_ENV['MYSQL_USER'], $_ENV['MYSQL_PASSWORD']));
+            $this->getPDO()?->exec("SET NAMES UTF8");
+        }
     }
 }

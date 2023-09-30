@@ -29,12 +29,8 @@ abstract class PDOConnection implements IConnection
      */
     public function __construct()
     {
-        try {
-            if (!extension_loaded('pdo')) throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('pdo'));
-            $this->initialize();
-        } catch (\Exception|\Throwable $exception) {
-            throw new DatabaseException($exception->getMessage());
-        }
+        if (!extension_loaded('pdo'))
+            throw new DatabaseException(MapperStringTemplate::EXTENSION_REQUIRED->get('pdo'));
     }
 
     public function __destruct()

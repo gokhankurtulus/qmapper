@@ -8,8 +8,10 @@
 namespace QMapper\Core\Builders;
 
 use MongoDB\BSON\ObjectId;
+use MongoDB\Client;
 use MongoDB\Driver\BulkWrite;
 use MongoDB\Driver\Command;
+use MongoDB\Driver\Manager;
 use QMapper\Core\Collection;
 use QMapper\Core\Connections\MongoDBConnection;
 use QMapper\Enums\MapperStringTemplate;
@@ -18,11 +20,20 @@ use QMapper\Interfaces\IBuilder;
 
 class MongoDBBuilder extends MongoDBConnection implements IBuilder
 {
+    public function initialize(): void
+    {
+        $this->setManager(new Manager($_ENV['MONGODB_DSN']));
+        $this->setClient(new Client($_ENV['MONGODB_DSN']));
+        $this->setDatabase($this->getClient()?->selectDatabase($_ENV['MONGODB_DATABASE']));
+        $this->setCollection($this->getDatabase()?->selectCollection($this->getCollectionName()));
+    }
+
     protected ?string $index = null;
     protected mixed $query = null;
     protected array $bindings = [];
     protected ?string $operation = null;
     protected array $cudOperations = ['create', 'update', 'delete'];
+    protected string $collectionName = "";
 
     /**
      * @return string|null
@@ -88,7 +99,7 @@ class MongoDBBuilder extends MongoDBConnection implements IBuilder
      * @param array $bindings
      * @return void
      */
-    public function setBindings(array $bindings)
+    public function setBindings(array $bindings): void
     {
         $this->bindings = $bindings;
     }
@@ -143,6 +154,23 @@ class MongoDBBuilder extends MongoDBConnection implements IBuilder
     }
 
     /**
+     * @return string
+     */
+    public function getCollectionName(): string
+    {
+        return $this->collectionName;
+    }
+
+    /**
+     * @param string $collectionName
+     * @return void
+     */
+    public function setCollectionName(string $collectionName): void
+    {
+        $this->collectionName = $collectionName;
+    }
+
+    /**
      * @return IBuilder
      */
     public function count(): IBuilder
@@ -173,7 +201,7 @@ class MongoDBBuilder extends MongoDBConnection implements IBuilder
      */
     public function from(string $table): IBuilder
     {
-        $this->setCollection($this->getDatabase()?->selectCollection($table));
+        $this->setCollectionName($table);
         return $this;
     }
 
@@ -304,7 +332,7 @@ class MongoDBBuilder extends MongoDBConnection implements IBuilder
         $this->setOperation('create');
         $this->clearQuery();
         $this->clearBindings();
-        $this->setCollection($this->getDatabase()?->selectCollection($table));
+        $this->setCollectionName($table);
         return $this;
     }
 
@@ -327,7 +355,7 @@ class MongoDBBuilder extends MongoDBConnection implements IBuilder
         $this->setOperation('update');
         $this->clearQuery();
         $this->clearBindings();
-        $this->setCollection($this->getDatabase()?->selectCollection($table));
+        $this->setCollectionName($table);
         return $this;
     }
 
@@ -361,6 +389,7 @@ class MongoDBBuilder extends MongoDBConnection implements IBuilder
     public function build(): Collection
     {
         try {
+            $this->initialize();
             $filter = $this->getQuery();
             $this->changeIndexKeyToObjectKey($filter);
             $this->setQuery($filter);
@@ -369,6 +398,8 @@ class MongoDBBuilder extends MongoDBConnection implements IBuilder
             } else {
                 [$data, $rowCount, $lastInsertId] = $this->handleRead();
             }
+            $this->clearQuery();
+            $this->clearBindings();
             return new Collection($data, $rowCount, $lastInsertId);
         } catch (\Exception|\Throwable $ex) {
             throw new DatabaseException($ex->getMessage());
@@ -474,7 +505,7 @@ class MongoDBBuilder extends MongoDBConnection implements IBuilder
     private function removeMatchInFilter(array &$data): void
     {
         $newData = [];
-        foreach ($data as &$item) {
+        foreach ($data as $item) {
             if (is_array($item)) {
                 if (isset($item['$match']) && is_array([$item['$match']])) {
                     $newData = array_merge($newData, $item['$match']);

@@ -10,7 +10,6 @@ namespace QMapper\Core\Builders;
 use QMapper\Core\Collection;
 use QMapper\Core\Connections\PDOConnection;
 use QMapper\Enums\MapperStringTemplate;
-use QMapper\Exceptions\BuilderException;
 use QMapper\Exceptions\DatabaseException;
 use QMapper\Interfaces\IBuilder;
 
@@ -177,7 +176,7 @@ abstract class PDOBuilder extends PDOConnection implements IBuilder
     /**
      * @param array ...$args
      * @return $this
-     * @throws BuilderException
+     * @throws DatabaseException
      */
     public function where(array ...$args): self
     {
@@ -188,7 +187,7 @@ abstract class PDOBuilder extends PDOConnection implements IBuilder
     /**
      * @param array ...$args
      * @return $this
-     * @throws BuilderException
+     * @throws DatabaseException
      */
     public function orWhere(array ...$args): self
     {
@@ -200,7 +199,7 @@ abstract class PDOBuilder extends PDOConnection implements IBuilder
      * @param string $logicalOperator
      * @param array ...$args
      * @return void
-     * @throws BuilderException
+     * @throws DatabaseException
      */
     public function position(string $logicalOperator, array ...$args): void
     {
@@ -214,7 +213,7 @@ abstract class PDOBuilder extends PDOConnection implements IBuilder
 
         foreach ($args as $index => $condition) {
             if (count($condition) !== 3)
-                throw new BuilderException(MapperStringTemplate::INVALID_ARGUMENTS->get());
+                throw new DatabaseException(MapperStringTemplate::INVALID_ARGUMENTS->get());
             [$field, $operator, $value] = $condition;
             if ($index > 0) {
                 $clause .= " AND ";
@@ -249,7 +248,7 @@ abstract class PDOBuilder extends PDOConnection implements IBuilder
     /**
      * @param array ...$args
      * @return $this
-     * @throws BuilderException
+     * @throws DatabaseException
      */
     public function orderBy(array ...$args): self
     {
@@ -258,7 +257,7 @@ abstract class PDOBuilder extends PDOConnection implements IBuilder
         $lastItem = array_key_last($args);
         foreach ($args as $index => $sort) {
             if (count($sort) !== 1 && count($sort) !== 2) {
-                throw new BuilderException(MapperStringTemplate::INVALID_ARGUMENTS->get());
+                throw new DatabaseException(MapperStringTemplate::INVALID_ARGUMENTS->get());
             }
             @[$field, $direction] = $sort;
             $clause .= " {$field} {$direction} " . ($multipleOrderClauses && $index !== $lastItem ? ',' : '');
@@ -350,11 +349,12 @@ abstract class PDOBuilder extends PDOConnection implements IBuilder
 
     /**
      * @return Collection
-     * @throws BuilderException
+     * @throws DatabaseException
      */
     public function build(): Collection
     {
         try {
+            $this->initialize();
             $this->getPDO()->beginTransaction();
             $statement = $this->getPDO()->prepare($this->getQuery());
             $statement->execute($this->getBindings());
@@ -363,11 +363,13 @@ abstract class PDOBuilder extends PDOConnection implements IBuilder
             $lastInsertId = $this->getPDO()->lastInsertId();
             if ($this->getPDO()->inTransaction())
                 $this->getPDO()->commit();
+            $this->clearQuery();
+            $this->clearBindings();
             return new Collection($data, $rowCount, $lastInsertId);
         } catch (\Exception|\Throwable $ex) {
             if ($this->getPDO()->inTransaction())
                 $this->getPDO()->rollBack();
-            throw new BuilderException($ex->getMessage());
+            throw new DatabaseException($ex->getMessage());
         }
     }
 }
