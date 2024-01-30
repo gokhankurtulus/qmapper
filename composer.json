@@ -1,0 +1,32 @@
+{
+  "name": "gokhankurtulus/qmapper",
+  "description": "A simple PHP library for creating models and database relations.",
+  "keywords": [
+    "query builder",
+    "query mapper"
+  ],
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "QMapper\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "gokhankurtulus",
+      "email": "gokhan@gokhankurtulus.com",
+      "homepage": "https://github.com/gokhankurtulus"
+    }
+  ],
+  "require": {
+    "php": "^8.1 || ^8.2",
+    "gokhankurtulus/logger": "^1.0",
+    "ext-pdo": "*"
+  },
+  "config": {
+    "preferred-install": "dist"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
